@@ -3,7 +3,7 @@
 A cordova plugin, a JS version of Wechat SDK
 
 # install
-sudo cordova plugin add https://github.com/CUGCQH/cordova-plugin-wechatsdk.git --variable wechatappid=wx2325284df30d829f --yourwechatappid WECHATAPPSECRET=yourWECHATAPPSECRET
+sudo cordova plugin add https://github.com/EiyouZk/PhoneGap-wechat-ThirdLogin.git --variable wechatappid=yourwechatappid WECHATAPPSECRET=yourWECHATAPPSECRET
 # Feature
 
 Share title, description, image, and link to wechat moment(朋友圈)
