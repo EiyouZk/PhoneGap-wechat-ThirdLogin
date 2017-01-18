@@ -95,4 +95,7 @@ Wechat.sendPaymentRequest(params, function () {
     alert("Failed: " + reason);
 });
 ```
-
+问题及解决方法总结：
+（1）问题：java文件报引文件错误，找不到对应类。
+     解决：在微信开放平台下载最新的jar包，引入到工程中。
+（2）问题：
