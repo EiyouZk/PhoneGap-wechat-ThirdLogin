@@ -11,6 +11,8 @@ static int const MAX_THUMBNAIL_SIZE = 320;
 
 @implementation CDVWechat
 
+NSString *body=@"";
+
 #pragma mark "API"
 - (void)pluginInitialize {
     NSString* appId = [[self.commandDelegate settings] objectForKey:@"wechatappid"];
@@ -120,13 +122,14 @@ static int const MAX_THUMBNAIL_SIZE = 320;
     }
     else
     {
-        [self failWithCallbackID:command.callbackId withMessage:@"发送请求失败"];
+        [self failWithCallbackID:command.callbackId withMessage:@"发送请求失败，检查是否安装微信客户端"];
     }
 }
 
 - (void)sendPaymentRequest:(CDVInvokedUrlCommand *)command
 {
     // check arguments
+    
     NSDictionary *params = [command.arguments objectAtIndex:0];
     if (!params)
     {
@@ -138,11 +141,11 @@ static int const MAX_THUMBNAIL_SIZE = 320;
     NSArray *requiredParams;
     if ([params objectForKey:@"mch_id"])
     {
-        requiredParams = @[@"mch_id", @"prepay_id", @"timestamp", @"nonce", @"sign"];
+        requiredParams = @[@"mch_id", @"prepay_id", @"timestamp", @"nonce_str", @"sign"];
     }
     else
     {
-        requiredParams = @[@"partnerid", @"prepayid", @"timestamp", @"noncestr", @"sign"];
+        requiredParams = @[@"partnerid", @"prepayid", @"timestamp", @"noncestr", @"sign",@"body"];
     }
     
     for (NSString *key in requiredParams)
@@ -161,6 +164,8 @@ static int const MAX_THUMBNAIL_SIZE = 320;
     req.nonceStr = [params objectForKey:requiredParams[3]];
     req.package = @"Sign=WXPay";
     req.sign = [params objectForKey:requiredParams[4]];
+    
+    body = [params objectForKey:requiredParams[5]];
 
     if ([WXApi sendReq:req])
     {
@@ -169,7 +174,7 @@ static int const MAX_THUMBNAIL_SIZE = 320;
     }
     else
     {
-        [self failWithCallbackID:command.callbackId withMessage:@"发送请求失败"];
+        [self failWithCallbackID:command.callbackId withMessage:@"发送请求失败，检查是否安装微信客户端"];
     }
 }
 
@@ -232,7 +237,10 @@ static int const MAX_THUMBNAIL_SIZE = 320;
             NSString *country=authResp.country;
             
             ////////////////////////获取token///////////////
-            NSString *APPSecret=@"7c3213677c04109f622f71598e4bd62c";
+            //NSString *APPSecret=@"7c3213677c04109f622f71598e4bd62c";
+            
+            NSString *APPSecret=@"d95f4bf4c6868cd92f8c8cb74ab4a2a8";
+            
             
             //[NSString initWithFormat:@"%@,%@", string1, string2 ];
             NSString *baseUrl=@"https://api.weixin.qq.com/sns/oauth2/access_token?appid=";
@@ -315,13 +323,23 @@ static int const MAX_THUMBNAIL_SIZE = 320;
             
             [self.commandDelegate sendPluginResult:commandResult callbackId:self.currentCallbackId];
         }
+        else  if ([resp isKindOfClass:[PayResp class]])
+        {
+            response = @{
+                         @"body": body,
+                         @"state":@"success",
+                         };
+            
+            CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:response];
+            
+            [self.commandDelegate sendPluginResult:commandResult callbackId:self.currentCallbackId];
+        }
         else
         {
             [self successWithCallbackID:self.currentCallbackId];
         }
     }
-    else
-    {
+    else{
         [self failWithCallbackID:self.currentCallbackId withMessage:message];
     }
     

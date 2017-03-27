@@ -1,11 +1,14 @@
 package org.tencent.wechat;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.os.Message;
 import android.util.Base64;
 import android.util.Log;
 import android.webkit.URLUtil;
+import android.widget.TextView;
 
 import com.tencent.mm.sdk.modelmsg.SendAuth;
 import com.tencent.mm.sdk.modelmsg.SendMessageToWX;
@@ -21,6 +24,7 @@ import com.tencent.mm.sdk.modelmsg.WXWebpageObject;
 import com.tencent.mm.sdk.modelpay.PayReq;
 import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
+//import com.unionpay.UPPayAssistEx;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaArgs;
@@ -36,6 +40,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+//import com.unionpay.UPPayAssistEx;
+//import  org.unionpay.uppayplugin.demo.BaseActivity;
+//import  org.unionpay.uppayplugin.demo.UnionPay;
+
 public class Wechat extends CordovaPlugin {
 
     public static final String TAG = "Cordova.Plugin.Wechat";
@@ -44,9 +52,10 @@ public class Wechat extends CordovaPlugin {
 
     public static final String ERROR_WECHAT_NOT_INSTALLED = "未安装微信";
     public static final String ERROR_INVALID_PARAMETERS = "参数格式错误";
-    public static final String ERROR_SEND_REQUEST_FAILED = "发送请求失败";
+    public static final String ERROR_SEND_REQUEST_FAILED = "发送请求失败,检查是否安装微信客户端";
     public static final String ERROR_WECHAT_RESPONSE_COMMON = "普通错误";
     public static final String ERROR_WECHAT_RESPONSE_USER_CANCEL = "用户点击取消并返回";
+    public static String body = "";
     public static final String ERROR_WECHAT_RESPONSE_SENT_FAILED = "发送失败";
     public static final String ERROR_WECHAT_RESPONSE_AUTH_DENIED = "授权失败";
     public static final String ERROR_WECHAT_RESPONSE_UNSUPPORT = "微信不支持";
@@ -93,6 +102,8 @@ public class Wechat extends CordovaPlugin {
     protected CallbackContext currentCallbackContext;
     protected IWXAPI wxAPI;
     protected String appId;
+
+
 
     @Override
     protected void pluginInitialize() {
@@ -144,6 +155,7 @@ public class Wechat extends CordovaPlugin {
             throws JSONException {
         final IWXAPI api = getWXAPI();
 
+
         // check if installed
         if (!api.isWXAppInstalled()) {
             callbackContext.error(ERROR_WECHAT_NOT_INSTALLED);
@@ -165,7 +177,8 @@ public class Wechat extends CordovaPlugin {
         if (params.has(KEY_ARG_SCENE)) {
             switch (params.getInt(KEY_ARG_SCENE)) {
                 case SCENE_FAVORITE:
-                    req.scene = SendMessageToWX.Req.WXSceneFavorite;
+                    //req.scene = SendMessageToWX.Req.WXSceneFavorite;
+                    String str = "";
                     break;
                 case SCENE_TIMELINE:
                     req.scene = SendMessageToWX.Req.WXSceneTimeline;
@@ -266,9 +279,18 @@ public class Wechat extends CordovaPlugin {
             req.partnerId = params.has("mch_id") ? params.getString("mch_id") : params.getString("partnerid");
             req.prepayId = params.has("prepay_id") ? params.getString("prepay_id") : params.getString("prepayid");
             req.nonceStr = params.has("nonce") ? params.getString("nonce") : params.getString("noncestr");
-            req.timeStamp = params.getString("timestamp");
+            req.timeStamp = params.has("timeStamp") ? params.getString("timeStamp") : params.getString("timestamp");
             req.sign = params.getString("sign");
             req.packageValue = "Sign=WXPay";
+
+            this.body = params.getString("body");;
+
+            if(req.checkArgs()){
+                Log.v("xxx" ,"cccccc");
+            }else{
+                Log.v("xxx" ,"bbbbbbb");
+            }
+
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
 
