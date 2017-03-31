@@ -1,4 +1,4 @@
-package com.gli.reader.wxapi;
+package com.example.demo.wxapi;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 
-import com.gli.reader.R;
+import com.example.demo.R;
 import com.tencent.mm.sdk.constants.ConstantsAPI;
 import com.tencent.mm.sdk.modelbase.BaseReq;
 import com.tencent.mm.sdk.modelbase.BaseResp;
@@ -19,7 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParserException;
 
-import com.gli.reader.Wechat;
+import org.tencent.wechat.Wechat;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -77,7 +77,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
                         auth(resp);
                         break;
 
-                    case ConstantsAPI.COMMAND_PAY_BY_WX:
+                    //case ConstantsAPI.COMMAND_PAY_BY_WX:
                     default:
                         Wechat.instance.getCurrentCallbackContext().success();
                         break;
@@ -138,6 +138,36 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
         return this.appId;
     }
 
+    protected String getAppId() {
+        XmlResourceParser xmlp= getResources().getXml(R.xml.config);
+        String name=null;
+        String value=null;
+        try {
+            while (xmlp.getEventType()!=XmlResourceParser.END_DOCUMENT) {
+                if(xmlp.getEventType()==XmlResourceParser.START_TAG){
+                    if(xmlp.getName().equals("preference")){
+                        name= xmlp.getAttributeValue(null, "name");
+                        value=xmlp.getAttributeValue(null, "value");
+                        System.out.println(String.format("姓名：%s  年龄：%s",name,value));
+                        //if(name.equals("WECHATAPPSECRET"))
+                        //break;
+                        if(name.equals("WECHATAPPID"))
+                            break;
+
+                    }
+                }
+                xmlp.next();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        }
+        this.appId=value;
+        return this.appId;
+    }
+
     protected void startMainActivity() {
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -150,8 +180,9 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
         Log.d(Wechat.TAG, res.toString());
         final  JSONObject response = new JSONObject();
         final String APPSecret=getAppSecret();
+        final String APPId=getAppId();
 
-        final String urlStr = "https://api.weixin.qq.com/sns/oauth2/access_token?appid="+Wechat.appId+"&secret="+APPSecret+
+        final String urlStr = "https://api.weixin.qq.com/sns/oauth2/access_token?appid="+APPId+"&secret="+APPSecret+
                 "&code="+res.code+"&grant_type=authorization_code";
         /*-----------------------------------------------------------------------*/
         new Thread() {
